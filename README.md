@@ -5,6 +5,15 @@ EdenApple是一个实验性质的解释器实现，准备用Scheme实现。
 
 ## 记录
 
+### CPS变换的一次尝试
+
+按照ORBIT那篇论文中给出的一小段代码尝试了一下CPS变换的编写，其中比较复杂的一部分地方是对call结构的CPS变换。
+
+call结构形如`(p a1 a2 a3)`，其中p，an都有可能是另一个form，需要依次递归调用convert，并且在convert的continuation参数中代入一个临时构造的lambda结构。
+
+```Scheme
+
+```
 
 ### r6rs
 
