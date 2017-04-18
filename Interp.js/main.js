@@ -1,5 +1,8 @@
 
 // test program
+/*
+((lambda (v) v) 1)
+*/
 
 var code = 
 ["frame", ["halt"],
