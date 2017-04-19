@@ -1,12 +1,17 @@
 \documentclass[type=bachelor]{thuthesis}
 \usepackage{thuthesis}
-\usepackage{minted}
+\usepackage[section,newfloat=true]{minted}
+\usepackage{hypcap}
 \usepackage{etoolbox}
 \usepackage{setspace}
 
 % fix minted fontsize and linespacing
 \AtBeginEnvironment{minted}{\singlespacing%
   \fontsize{10}{10}\selectfont}
+% add frame
+\setminted{frame=lines,framesep=2mm}
+% code env to support page break
+\newenvironment{code}{\captionsetup{type=listing}}{}
 
 \graphicspath{{figures/}}
 
@@ -19,22 +24,21 @@
 
 \mainmatter
 %% page style
-\fancypagestyle{plain}{%
-%  \fancyhead[R]{湖北大学本科毕业论文（设计）}
-  \fancyhead[C]{\xiaowu\thepage}
+\fancypagestyle{hubu@thesis}{%
+  \fancyhead[R]{\songti\xiaowu\textit{湖北大学本科毕业论文（设计）}}
   \fancyfoot[C]{\xiaowu\thepage}
   \renewcommand{\headrulewidth}{0pt}
   \renewcommand{\footrulewidth}{0pt}}
-%\pagestyle{hubu@thesis}
+\pagestyle{hubu@thesis}
 
-\include{ch01-preamble}
-\include{ch02-basic-structure}
-\include{ch03-impl}
+\include{ch01-intro}
+\include{ch02-lang-features}
+\include{ch03-interp}
 
 \backmatter
 
-%\bibliographystyle{thuthesis}
-%\bibliography{ref/refs}
+\bibliographystyle{thuthesis}
+\bibliography{ref}
 
 %% 致谢
 %\include{data/ack}

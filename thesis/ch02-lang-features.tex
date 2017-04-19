@@ -1,0 +1,117 @@
+﻿%
+% 第二章 语言特性
+%
+
+\chapter{常见语法特性}
+
+Lisp经过半个多世纪的发展，产生了许许多多的方言，这些方言不仅逐渐完善了Lisp最初的核心功能，还将许多思想带入到了Lisp系语言。比如hygienic macro，lexical scoping，first class continuation，等等。接下来简单讲解下lexical scoping，first class continuation与proper tail call optimization。
+
+为了方便描述，本论文接下来将以scheme作为主要描述对象，scheme是Lisp的一个方言。是众多Lisp方言中较为简洁明了的一个方言，同时仍然具备完整灵活的主要语言特性。关于scheme以及其实现的更多资料，可以参考Kent Dybvig的The Scheme Programming Language\cite{dybvig09scm}，SICP\cite{sicp}，Lisp in Small Pieces\cite{que03}等书。
+
+\section{词法作用域}
+
+lexical scoping是词法作用域的意思，也就是当程序需要查找一个变量的时候，会以代码中的词法结构为依据查找。这种查找策略广泛应用于现代的各个语言中，而且符合人的直觉。以至于很难去理解若不是词法作用域还能存在怎样的查找策略。所以在此先提及动态作用域然后给出例子对比两种不同策略下行为的差异。
+
+一种动态作用域的查找策略是自上而下搜索程序当前运行状态中的控制栈，也称为调用栈。这就需要该语言具备子过程或者称为函数的抽象。函数在程序运行过程中可以相互调用，每一次调用都会为该函数维护一个临时的数据区，存放本地变量，传入参数，返回地址等信息。这种数据区叫做调用帧，由于函数调用天然具备先进先出的特征，这些调用帧通常以栈的方式组织。动态作用域的变量解析便可以沿着这条调用帧链自顶向下查找对应名字的值。
+
+还有一种动态作用域的模型是将所有变量放入到一个空间中。
+
+而词法作用域对于变量的解析严格限制于变量解析在代码中的位置，沿着代码中的词法结构所构造出的作用域链查找。
+
+比如在这段C代码中：
+
+\begin{code}
+\begin{minted}{C}
+int hello = 1;
+
+int fun() {
+  return hello;
+}
+
+void call() {
+  int hello = 2;
+  int result = fun();
+}
+\end{minted}
+\caption{作用域示例代码}
+\end{code}
+
+变量hello有两处定义，一处在全局，定义为1，一处为call函数的本地变量，初始化为2。fun函数调用的结果毫无疑问是1。按照词法作用域，fun在获取hello的值时，会在定义处，也就是fun函数所创建的作用域，以及该作用域的上级词法作用域（这里只有一个全局）去解析hello变量的值。
+
+如果把该示例的全部内容看作是全局作用域，可以发现，fun的定义在代码文本结构上是全局中的一部分，所以fun所构建的作用域以全局作为上级作用域，而对hello变量的引用是发生在fun的定义中的，自然对hello的解析也是从fun所创建的作用域开始。这便是词法作用域中词法一词的由来。
+
+与此相对应的，如果采用动态作用域，hello的解析会依赖于程序运行时的调用栈一级一级向上查找变量。那么此时结果应该为2。
+
+由于动态作用域的违反直觉的行为，编程语言往往以词法作用域为主。然而也有某些语言采用该策略，比如perl，elisp等。动态作用域的一个优点是配置的注入变得非常直接，而且动态作用域在实现上往往也非常直接简单。因为不需要单独维护一个变量解析的环境，程序执行时的控制栈就是变量解析的环境。
+
+\section{call/cc}
+
+call/cc是scheme中的一个语法式。通过call/cc，scheme提供了first class continuation的特性，也就是可以将continuation作为值传递。这里continuation的含义是程序接下来要执行的事情。往往，对于一个程序的执行过程，可以将其抽象成当前的计算和接下来需要执行的事情，而程序的运行可以表示为将当前的计算结果传入下一个continuation。
+
+下面以一段实际的scheme代码为例：
+
+\begin{code}
+\begin{minted}{scheme}
+(define k)
+
+(let ([x (call/cc
+	  (lambda (return)
+	    (set! k return)
+	    0))])
+  (display x))
+
+(k 1)
+(k 2)
+(k 3)
+;; => 0123
+\end{minted}
+\caption{call/cc示例}
+\label{call/cc sample}
+\end{code}
+
+程序\ref{call/cc sample}中我们首先定义了变量k，接下来这段的语义是调用call/cc并将结果保存到x，然后打印x。在call/cc中的$\lambda$函数中将传入的return保存到了k变量。之后分别以1，2，3调用k。
+
+在这里让人感到有意思的是调用k的含义。通过输出我们看到display语句被执行了四遍，其中的0是正常的执行流程，后面的123显然是调用k所得的结果，但是k的值显然并不是一个函数抽象，display也并不属于任何一个函数抽象。
+
+这正是first class continuation带来的效果。每一次k的调用都会将整个程序的执行状态恢复到call/cc调用刚结束的时候。而call/cc调用结束之后的事情包括将结果绑定到x并打印x。这里可以将k看作是一个只能回到某一特定时间节点的时光机。
+
+这个特性以及其变体在其他语言，比如SML，OCaml，Haskell中也有相应的实现。通过call/cc可以实现许多复杂的控制结构，比如McCarthy的amb操作符\cite{mccarthy61}，coroutine，异常处理，线程，等等。
+
+\section{尾调用优化}
+
+在程序执行过程中一个基本的操作便是函数调用，通常伴随着函数调用操作，控制栈上会压入一帧来保存本次调用需要的数据，或者类似的行为。但是，随着函数调用深度的加深，尤其是在递归调用中，控制栈的大小会越来越大，直到超过一定限制导致程序错误。这里介绍一种特殊的递归情况，在这种情况下的递归调用不需要增长控制栈的大小，由此可以带来无限递归的可能。
+
+在一个函数的具体执行流程中，当某一个函数调用操作的直接后继操作是返回（return）时，该操作可以被称之为尾调用（tail call）。尾调用具有如下特性：
+
+\begin{enumerate}[1.]
+\item 是一次函数调用的一部分，而不是全局中的一条语句
+\item 尾调用的结果为当前函数的结果
+\end{enumerate}
+
+比如下面的示例中的所有t函数的调用。
+
+\begin{code}
+\begin{minted}{scheme}
+(define (t i)
+  (display i)
+  (+ i 1))
+
+(lambda ()
+  (t 1))
+
+(lambda ()
+  (let ([x 3])
+    (t x)))
+
+(lambda ()
+  (let ([x 3])
+    (if (> x 2)
+	(t x)
+	(t (- x 1)))))
+\end{minted}
+\caption{尾调用示例}
+\end{code}
+
+需要注意的是尾调用并不仅仅指符合上述要求的自递归或互递归，任何符合上述条件的尾调用都是尾调用。但是尾调用使得符合条件的线性递归调用不再担心控制栈溢出的情况，详细内容可以参考SICP\cite{sicp}的1.2.1节和5.4节。
+
+除了scheme等函数式语言之外，尾调用在微软的CLR，下一版本的JS中都有相应的实现。
