@@ -1,4 +1,4 @@
-﻿%
+%
 % 第二章 语言特性
 %
 
@@ -55,9 +55,9 @@ call/cc是scheme中的一个语法式。通过call/cc，scheme提供了first cla
 (define k)
 
 (let ([x (call/cc
-	  (lambda (return)
-	    (set! k return)
-	    0))])
+          (lambda (return)
+            (set! k return)
+            0))])
   (display x))
 
 (k 1)
@@ -106,8 +106,8 @@ call/cc是scheme中的一个语法式。通过call/cc，scheme提供了first cla
 (lambda ()
   (let ([x 3])
     (if (> x 2)
-	(t x)
-	(t (- x 1)))))
+        (t x)
+        (t (- x 1)))))
 \end{minted}
 \caption{尾调用示例}
 \end{code}
