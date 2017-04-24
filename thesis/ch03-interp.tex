@@ -99,10 +99,13 @@ VM是程序能够运行的核心。通常一个机器能够运行体现在他能
 
 所以在语言具备闭包特性的情况下，环境与控制上下文难以如同C语言中那样简单直接的组合在一起。但是并不是表示只能够将两个上下文完全分开管理，因为栈式结构中本地变量的管理与访问速度相比较于放入堆中的情况更加简单而且快速，所以也存在过相关的研究与结果，详情参考Three implementation models for scheme\cite{dybvig87timpl}以及chez scheme。 
 
-关于闭包在内存中的结构，可以参考下图：
+关于闭包在内存中的结构，可以参考图\ref{fig:closure-mem-layout}：
 
-%
-% TODO 图片还没画
-%
+\begin{figure}
+\centering
+\includegraphics[width=300pt]{closure-sample.pdf}
+\caption{闭包内存布局示例}
+\label{fig:closure-mem-layout}
+\end{figure}
 
 在本节中，主要讨论了程序运行需要的两种上下文，而这也是EdenApple的VM所要维护的核心结构，在第\ref{ch:vm impl}章中将详细地描述如何实现VM。

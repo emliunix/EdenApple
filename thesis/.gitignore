@@ -1,0 +1,12 @@
+*.fls
+*.log
+*.out
+/*.pdf
+*.thm
+*.toc
+*.xdv
+_minted*/
+*.aux
+*.bbl
+*.blg
+*_latexmk
