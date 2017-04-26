@@ -6,19 +6,100 @@
 % 凑凑字数 <- 真实目的
 %
 
+% haskell中运算符的定义
+
+\newcommand{\hsbind}[0]{$>\!\!>\!\!=$}
+\newcommand{\hschoice}[0]{$<\!\!|\!\!>$}
+
 \chapter{Monadic Parser Combinator}
 
-讲到Parser，这两天除了实现了一个基本的VM，剩下的时间基本上在鼓捣Parser。看了些许Parser Combinator的资料，重点在parsec上。parsec是一个Monadic Parser Combinator，在阅读过程中，略微有两点想法。
-一个是对Monad的理解，Monad是一个代数结构，Monad的数据首先是一个函数（具备 * -> * 这样的kind），其次，对他有bind(>>=)，>>，return，fail这几个操作。这几个操作的特点大概是都是以Monad数据为输入，返回的还是对应Monad的数据。
-所以，如果把parser看作是一个接受String，返回结果和剩余String (:: (a, String))的函数，重点是把他看作函数，那么Parser Combinator就是对这些函数进行不断的组合。
+对于一个完整的解释器而言，parser是必不可少的一部分。在上一章节中提及过EdenApple中的reader的唯一功能即parser。
+
+通常，一个parser可以通过手写状态机，或者使用parser generator来生成，在这里，将描述一种以函数组合的形式来完成parse的方法，称之为parser combinator。
+
+parser combinator作为一种parser编写的技巧并不怎么常见，这种技巧常见于函数式编程语言中，是一种将parser看作为函数并通过各种组合子一步步构建出复杂的解析规则的做法。一个比较出名的parser combinator的应用是Haskell中的parsec\cite{leijen01parsec}。
+
+或许是因为函数式编程语言比较小众，而且parser combinator在处理左文法以及在复杂文法和性能上的缺点等等原因，在现实应用中，parser combinator不怎么流行。当然，在对parser combinator的研究上也一直不曾停歇。
+
+\section{parser函数}
+
+首先，从功能上来看，parser所完成的工作可以描述为，给定一个字符串，按照语言特定的语法规则解析这个字符串，最终返回一个解释结果，这个结果通常是一个树状结构的数据，反映了对应语法规则下的一个具体的语义结构。
+
+如果将函数的定义与parser的工作过程对比，可以发现，一个parser可以看作是一个接收字符串为参数，返回一个解释结果的函数。
+
+但是，仅仅是这种将parser看作是函数的看法并不能够带来什么实质性的去构建一个parser的方法。
+
+在函数式编程中，一个重要的概念是高阶函数，一个函数可以接收函数作为参数，也可以返回一个函数。也就是说可以定义一类操作，将多个操作组合拼接成一个新的操作。parser combinator之所以称之为parser combinator，即是因为他的思想是将子parser按规则组合成为所需要的parser。
+
+\section{组合子}
+
+在描述组合子之前，先给出一些文法的例子以观察文法定义本身的组合特性。
+
+首先，给出一个最简单的文法的例子：
+
+\begin{listing}
+\begin{verbatim}
+<sample> ::= <chara><charb>
+<chara>  ::= a
+<charb>  ::= b
+\end{verbatim}
+\caption{顺序结构文法定义示例}
+\label{lst:seq-syntax-sample}
+\end{listing}
+
+在\ref{lst:seq-syntax-sample}中，sample的定义由chara和charb两个自定义组成，解析sample的过程可以描述为先解析chara，然后解析charb。在这里，可以看到文法定义中的一种组合方式是顺序组合。
+
+\begin{listing}
+\begin{verbatim}
+<sample> ::= <chara>|<charb>
+<chara>  ::= a
+<charb>  ::= b
+\end{verbatim}
+\caption{选择结构文法定义示例}
+\label{lst:choice-syntax-sample}
+\end{listing}
+
+在示例\ref{lst:choice-syntax-sample}中，将\ref{lst:seq-syntax-sample}的定义稍微改变了一下，这里的意思是sample可能是<chara>，也可能是<charb>。在实际的解析过程中，可以先尝试将输入以chara的方式解析，如果失败，那么重新以charb的方式解析。
+
+上面，介绍了词法规则中的两种组合方式，这两种组合方式基本上可以描述大部分情况的语法规则。同时，上面也提出了对于这两种文法组合方式的一种解析策略，需要注意的是这种解析策略并不适用所有可能的情况，比如左递归文法，如示例\ref{lst:ll-syntax-sample}中所示。
+
+\begin{listing}
+\begin{verbatim}
+<expr> ::= <expr> + <expr> |
+           <expr> - <expr> |
+           <expr> * <expr> |
+           <expr> / <expr> |
+           (<expr>) |
+           <number>
+\end{verbatim}
+\caption{左递归文法定义示例}
+\label{lst:ll-syntax-sample}
+\end{listing}
+
+\section{形式化定义}
+
+到目前为止，已经给出了将parser作为函数表示的思想，并通过示例文法给出了两种基本的组合方式，下面将以更加形式化的方式描述parser函数与组合子。
+
+首先，给出parser函数的定义：\mintinline[breaklines]{haskell}{String -> (a, String)}。函数定义的标记规则采用Haskell规范。需要注意的是，parser函数返回的是一个自定义类型的数据和未解析字符串的二元组。因为解析过程通常不会消耗完所有的字符串，剩余未解析的部分需要返回作为下一步骤解析的输入。这个步骤通常不需要手动完成，下面介绍的bind组合子可以自动化这个过程。
+
+解析器的操作对象是源码字符串，那么解析器组合子的操作对象就是解析器本身。通常可以看作是一个接收解析器为参数并返回一个组合后的解析器的函数。
+
+在Monadic Parser Combinator中，与文法组合相对应的，有顺序组合的组合子，称之为bind(\hsbind)组合，还有一个选择操作的组合子，称之为choice(\hschoice)组合。
+
+bind操作的签名为：\mintinline[breaklines]{haskell}{(>>=) :: m a -> (a -> m b) -> m b}。bind操作的定义为，返回一个m b类型的操作，该操作的行为是将m a操作的结果传入第二个参数所对应的函数并将这个函数所返回的操作的结果m b返回。
+
+与此相对应的，\hschoice{}操作是一种平行组合。\hschoice{}操作将两个操作组合，首先将文本传入第一个操作，如果第一个操作失败，转而将相同的文本传入第二个操作。\hschoice{}的签名为\mintinline[breaklines]{haskell}{(<|>) :: m a -> m a -> m a}。
+
+除了这两个基本组合外，还有一些常用的组合子和parser，加上这些基础元素，即可完成最基本的解析工作。这些基本元素有（定义P为 \mintinline[breaklines]{haskell}{type P a = String -> (a, String)}）：
+
+\begin{enumerate}
+\item \mintinline{haskell}{char :: P Char} --- 解析一个字符并返回这个字符，
+\item \mintinline{haskell}{return :: a -> P a}  --- 不消耗字符，直接返回结果，
+\item \mintinline{haskell}{(>>) :: P a -> P b -> P b} --- 返回第二个解析器的结果。
+\end{enumerate}
+
+\section{monad}
+
 Monad的组合操作都有个特点，就是结构上面体现了一种顺序结构。比如说bind操作，他的类型是 `m a -> (a -> m b) -> m b`。可以这么理解这个类型，首先进行`m a`操作，该操作的结果是`a`类型。再看第二个传入的值，他是一个函数，这个函数接受第一个操作的结果，并根据这个结果生成出第二个操作(类型为`m b`)，第二个操作返回`b`类型的结果。那么这个先进行第一个操作，再进行第二个操作，并最终返回第二个操作的结果的着整个一个过程，也就是两个过程按顺序执行的组合过程，就是bind操作所生成的值。
-第二个是关于Parser本身的，Parser有两个基本的组合，一个是上面的bind(`>>=`)组合，还一个choice(`<|>`)组合。在观察组合之前先观察parser本身，parser本身的类型 `String -> (a, String)`，反映了parser本身的功能，比较有意思的是返回的数据中还包括了未处理的文本数据。这样子可以在下一个parser传入这个文本，完成下一步的parse。正是这种结构，使得parser的组合变得简单直接。事实上，parser的bind操作就是这么一种操作：将第一个parse返回的未处理文本传入第二个parse。
-由此来看，bind操作是顺序组合，与此相对应的，`<|>`操作是一种平行组合。`<|>`操作将两个操作组合，首先将文本传入第一个操作，如果第一个操作失败，转而将相同的文本传入第二个操作。
-BNF文法中通常将一个元素表示为几个元素的顺序组合或者是用或`|`来表示两种不同的组合都是这个元素。比如：
-```
-<sexp> ::= <pair> | <atom>
-<pair> ::= (<sexp> . <sexp>)
-```
-而这正好就是parsec中的两种基本组合。
 monadic只是一种style，在parsec的论文中也讨论了另一种sytle，但是没仔细看，也不清楚是怎么实现组合的。关于parse，其实还有老多的东西不清楚，比如怎么稳妥的实现lookahead，怎么左递归，有哪些best practice什么的。
 还有个就是在parse sexp的时候，感觉blank字符的处理还是比较麻烦，这种字符起到分割作用但又不是必须的，两个token之间不一定需要空白字符来分割。有一种想法是先lex一遍将字符串变成token串，然后在以parser转换成树状结构，再然后来一遍pass将这个树转换成Expr树，Expr树中会带上具体的语义，比如这是一棵Let树，那是一棵If树，还有Lambda树之类的。到这种状态，基本上对于compile而言就是万事俱备，只差临门一脚了。
