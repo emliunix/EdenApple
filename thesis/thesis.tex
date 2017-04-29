@@ -13,6 +13,12 @@
 % code env to support page break
 \newenvironment{code}{\captionsetup{type=listing}}{}
 
+% 中文字体设置
+\setCJKmainfont{Noto Serif CJK SC}
+\setCJKsansfont{Noto Sans CJK SC}
+\setCJKmonofont{Noto Sans Mono CJK SC}
+\setCJKfamilyfont{zhkai}{STKaiti}
+
 \graphicspath{{figures/}}
 
 \begin{document}
@@ -48,10 +54,6 @@
 %\include{data/ack}
 
 % 翻译
-\chapter*{翻译}
-\addcontentsline{toc}{chapter}{翻译}
-
 \include{tran}
-\include{tran-the-little-schemer}
 
 \end{document}
