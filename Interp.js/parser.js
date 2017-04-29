@@ -1,43 +1,66 @@
 (function(g){
+    /*
+     * LispVal = symbol | number | bool | string | list of LispVal
+     *
+     * 使用vm.js中的V来构造数据
+     */
     var symbolChars = "!?#$%&|+-*/:<=>@^_~";
     var blankChars = " \t\n\r";
 
     let {stream, C, N, F} = g.parsec;
+
+    let {V} = g.vm;
+
+    /* util */
+
+    function _or([f, ...fr]) {
+	if(1 === fr.length) {
+	    return F.try(f).or(fr[0])
+	} else {
+	    return F.try(f).or(_or(fr))
+	}
+    }
+
+    /* definition */
     
     var _symbolChar = C.charIn(symbolChars)
     var symbol = F.try(C.letter).or(_symbolChar) // first
         .then(F.try(C.letter).or(F.try(N.digit).or(_symbolChar)).optrep()) // rest
-	.map(([first, rest=[]]) => [first, rest.join("")].join(""))
+	.map(([first, rest=[]]) => V.s([first, rest.join("")].join("")))
 
     var bool = C.char("#")
 	.thenRight(C.charIn("tf"))
-	.map(x => ({"t": true, "f": false})[x])
+	.map(x => ({"t": V.TRUE, "f": V.FALSE})[x])
 
     var _special_char = C.char("\\")
-	.thenRight(F.try(C.char("n").thenReturns("\n"))
-		   .or(C.char("t").thenReturns("\t"))
-		   .or(C.char("\"").thenReturns("\""))
-		   .or(C.char("\\").thenReturns("\\")))
+	.thenRight(_or(
+	    [C.char("n").thenReturns(V.string("\n")),
+	     C.char("t").thenReturns(V.string("\t")),
+	     C.char("\"").thenReturns(V.string("\"")),
+	     C.char("\\").thenReturns(V.string("\\"))]))
 
     var string = C.char("\"")
 	.thenRight(F.try(_special_char)
 		   .or(C.notChar("\""))
 		   .optrep()
-		   .map(xs => xs.join("")))
+		   .map(xs => V.string(xs.join(""))))
 	.thenLeft(C.char("\""))
 
     var _blankChars = C.charIn(blankChars).optrep()
 
     var lisp = F.lazy(
 	() => _blankChars
-	    .thenRight(F.try(bool)
-		       .or(symbol)
-		       .or(string)
-		       .or(N.integer)
-		       .or(list))
+	    .thenRight(_or(
+		[bool,
+		 N.integer.map(i => V.int(i)),
+		 // bool and integer shall be parsed
+		 // in precedence of symbol
+		 symbol,
+		 string,
+		 list]))
     )
 
-    var _list_tail = _blankChars.then(C.char(")")).thenReturns(null)
+    var _list_tail = _blankChars.then(C.char(")")).thenReturns(V.NULL)
     var _dotted_tail = _blankChars
 	.then(C.char("."))
 	.thenRight(lisp)
