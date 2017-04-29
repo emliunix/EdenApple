@@ -1,16 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Lisp Machine</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Lisp Machine</title>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-    <!-- vendor -->
-    <script src="./parser-combinator.min.js"></script>
-    <!-- VM -->
-    <script src="./vm.js"></script>
-    <script src="./main.js"></script>
+  <div class="container">
+    <header>EdenApple - a Lisp Machine</header>
+    <div class="code-editor">
+      <textarea id="code" class="content-box"></textarea>
+    </div>
+    <div class="inspection">
+      <div class="vm-state content-box"></div>
+      <div class="control-panel">
+	<button id="run" type="button"><div class="icon-run"></div></button>
+      </div>
+    </div>
+    <div class="output">
+      <div id="output-content" class="content-box"></div>
+    </div>
+  </div>
+  <footer>by emliunix</footer>
+  <!-- vendor -->
+  <script src="./parser-combinator.js"></script>
+  <!-- VM -->
+  <script src="./vm.js"></script>
+  <script src="./parser.js"></script>
+  <script src="./main.js"></script>
+
+  <script>
+    document.querySelector("#code").value =
+`((lambda (x)
+  (if (> x 0)
+    x
+    (- x)) -32)
+`
+  </script>
 </body>
 </html>
