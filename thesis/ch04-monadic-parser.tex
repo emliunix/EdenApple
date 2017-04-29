@@ -96,10 +96,47 @@ bind操作的签名为：\mintinline[breaklines]{haskell}{(>>=) :: m a -> (a -> 
 \item \mintinline{haskell}{char :: P Char} --- 解析一个字符并返回这个字符，
 \item \mintinline{haskell}{return :: a -> P a}  --- 不消耗字符，直接返回结果，
 \item \mintinline{haskell}{(>>) :: P a -> P b -> P b} --- 返回第二个解析器的结果。
+\item \mintinline{haskell}{satisfy :: (Char -> Bool) -> P Char} --- 若下一个字符符合某种条件，则返回该字符
+\item \mintinline{haskell}{many :: P a -> P [a]} --- 重复解析直到无法解析
 \end{enumerate}
 
-\section{monad}
+上述定义参考自monadic parser combinators\cite{hutton1996monadic}。
 
-Monad的组合操作都有个特点，就是结构上面体现了一种顺序结构。比如说bind操作，他的类型是 `m a -> (a -> m b) -> m b`。可以这么理解这个类型，首先进行`m a`操作，该操作的结果是`a`类型。再看第二个传入的值，他是一个函数，这个函数接受第一个操作的结果，并根据这个结果生成出第二个操作(类型为`m b`)，第二个操作返回`b`类型的结果。那么这个先进行第一个操作，再进行第二个操作，并最终返回第二个操作的结果的着整个一个过程，也就是两个过程按顺序执行的组合过程，就是bind操作所生成的值。
-monadic只是一种style，在parsec的论文中也讨论了另一种sytle，但是没仔细看，也不清楚是怎么实现组合的。关于parse，其实还有老多的东西不清楚，比如怎么稳妥的实现lookahead，怎么左递归，有哪些best practice什么的。
-还有个就是在parse sexp的时候，感觉blank字符的处理还是比较麻烦，这种字符起到分割作用但又不是必须的，两个token之间不一定需要空白字符来分割。有一种想法是先lex一遍将字符串变成token串，然后在以parser转换成树状结构，再然后来一遍pass将这个树转换成Expr树，Expr树中会带上具体的语义，比如这是一棵Let树，那是一棵If树，还有Lambda树之类的。到这种状态，基本上对于compile而言就是万事俱备，只差临门一脚了。
+\section{Monad}
+
+Monad是纯函数式编程中一个重要的概念，在Haskell中，依赖于Monad提供的代数结构组织具有顺序的一些列计算操作，比如IO，状态改变。这里提及两个Monad实现parser combinator所需的两个重要特性，第一个是上述的顺序性，parse作为一种计算操作需要按照一定的先后顺序执行，而且这种顺序也是文法定义的一部分。还一个是背景状态。在解析的过程中，解析器需要知道字符串正在解析的位置。在parser的定义中，可以看到返回的结果中包含了一个未解析的字符串，通过这个数据，在解析的过程中便可以知道当前解析操作已经进行到哪里了。而在组合的过程中，实际上并没有手动处理过这个数据，这是因为组合子在对parser进行组合的时候会自动的维护这个数据。比如在bind操作中，在完成第一个解析操作之后，会将结果中的这个\texttt{String}传入第二个解析操作。
+
+需要注意的是，Monad只是一种组合子的风格，事实上也存在其他风格的组合子。在parsec论文\cite{leijen01parsec}中，描述了一种arrow style的组合子，并对两种风格做了简短的比较。其中arrow style的组合子的核心操作为：\mintinline[breaklines]{haskell}{(<*>) :: Parser a -> Parser (a -> b) -> Parser b}。arrow style的组合子的第二个操作与第一个操作完全独立，这导致了他只能表示context free的文法，而monad style的则可以表一定程度上的context sensitive的文法，比如图\ref{lst:xml-parser-sample}中的XML解析器。
+
+\begin{code}
+  \begin{minted}{haskell}
+    xml = do{
+      name <- openTag
+      content <- many xml
+      endTag name
+      return (Node name content)
+    } <|> xmlText
+  \end{minted}
+  \caption{XML Monad解析器片段}
+  \label{lst:xml-parser-sample}
+\end{code}
+
+\section{Lisp文法}
+
+Monadic parser combinator的优点便是写parser时语义能够直接表达出来，因此编写比较简单。在这一小节中，首先给出EdenApple中使用的Lisp文法，然后讨论实现上的细节。
+
+Lisp使用S表达式来表达文法，S表达式只有两种基本结构，一个是原子（Atom），另一个是列表（List），其中一个特殊的是空列表或者null。对Atom和List的定义进行一些扩展就是所需要的Lisp文法。下面以ADT的形式给出LispVal的定义（以ADT而不是BNF给出定义一是因为ADT基本可以看作是BNF形式，还一个是因为ADT定义可以直接用以在程序中表示所需的解析结果数据类型）:
+
+\begin{listing}
+\begin{verbatim}
+LispVal = Symbol String |
+          List [LispVal] |
+          Number Integer |
+          String String |
+          Bool Bool
+\end{verbatim}
+\caption{LispVal定义}
+\label{lst:lisp-val-def}
+\end{listing}
+
+实现上采用parsec的一个js实现
