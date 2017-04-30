@@ -217,7 +217,7 @@
         "symbol?": (v) => V.bool(v[0] === T.SYMBOL),
         "string?": (v) => V.bool(v[0] === T.INT),
         "pair?": (v) => V.bool(v[0] === T.PAIR),
-        "null?": (v) => V.bool(v === V.NULL),
+        "null?": (v) => V.bool(v === V.NULL || v[0] === T.NULL),
         "list?": (v) => V.bool(v[0] === T.PAIR || v === V.NULL),
         "eq?"(a, b) {
             if (a[0] === b[0]) {
