@@ -65,14 +65,14 @@
 		 list]))
     )
 
-    var _list_tail = _blankChars.then(C.char(")")).thenReturns(V.NULL)
+    var _list_tail = _blankChars.then(C.charIn(")]")).thenReturns(V.NULL)
     var _dotted_tail = _blankChars
 	.then(C.char("."))
 	.thenRight(lisp)
 	.thenLeft(_list_tail)
     
     var list =
-	C.char("(")
+	C.charIn("([")
 	.thenRight(
 	    F.try(lisp.rep()
 		  .then(F.try(_list_tail).or(_dotted_tail))
