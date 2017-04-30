@@ -48,6 +48,11 @@
 
     var _blankChars = C.charIn(blankChars).optrep()
 
+    /**
+     * 入口parser在此处定义，并采用惰性求值的方式，
+     * 使得list的定义可以向上递归使用lisp的定义，
+     * 构成一个互递归的结构
+     */
     var lisp = F.lazy(
 	() => _blankChars
 	    .thenRight(_or(
