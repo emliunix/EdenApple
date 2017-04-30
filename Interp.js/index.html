@@ -11,7 +11,7 @@
   <div class="container">
     <header>EdenApple - a Lisp Machine</header>
     <div class="code-editor">
-      <textarea id="code" class="content-box"></textarea>
+      <pre id="code" contenteditable class="content-box scrollbar"></pre>
     </div>
     <div class="inspection">
       <div class="vm-state content-box"></div>
@@ -29,14 +29,17 @@
   <!-- VM -->
   <script src="./vm.js"></script>
   <script src="./parser.js"></script>
+  <script src="./compiler.js"></script>
   <script src="./main.js"></script>
 
   <script>
-    document.querySelector("#code").value =
-`((lambda (x)
-  (if (> x 0)
-    x
-    (- x)) -32)
+    document.querySelector("#code").innerHTML =
+`
+((lambda (x)
+   (if (> x 0)
+     x
+     (- x)))
+ (+ 1 2))
 `
   </script>
 </body>

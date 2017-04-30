@@ -54,28 +54,38 @@ html, body {
 
 .code-editor::before {
     content: "code";
-    font-family: "mono";
+    font-family: monospace;
+    font-size: 16px;
     padding: 3px;
     position: absolute;
     color: #8e8e8e;
     display: block;
-    top: 15px;right: 15px;
+    top: 15px;
+    right: 15px;
     border-radius: 3px;
+    background-color: rgba(248, 248, 248, 0.5);
+    z-index: 999;
 }
 
-.code-editor textarea {
+.code-editor #code {
     resize: none;
     border: none;
     width: 100%;
     height: 100%;
     box-sizing: border-box;
     padding: 15px;
+    margin: 0px;
     font-family: monospace;
+    overflow-y: auto;
 }
 
-.code-editor textarea:focus {
+.code-editor #code:focus {
     border: none;
     outline: none;
+}
+
+.scroll-bar::-webkit-scrollbar {
+    display: none;
 }
 
 /* vm-state */
@@ -190,7 +200,8 @@ html, body {
     display: block;
     content: "output";
     color: #ddd;
-    font-famliy: monospace;
+    font-family: monospace;
+    font-size: 16px;
     position: absolute;
     top: 5px;
     right: 15px;
