@@ -1,0 +1,20 @@
+\chapter{总结}
+
+与C，Java这一类语言相比较，scheme语言具有动态作用域，一等函数（闭包）。这使得程序编写时数据和操作的组织更加灵活。call/cc功能更是为编写组织复杂控制结构提供了强有力的武器。在EdenApple中，实现了一等函数，call/cc，尾递归优化这三个基本的特性。
+
+然而EdenApple任然存在着无法忽视的缺陷。
+
+因为一等函数与词法作用域的共同作用（闭包），EdenApple中的环境使用最为直接的堆模型实现。又因为call/cc需要保存控制栈的信息，控制栈也采用堆的方式实现。
+
+Heap based model由于其控制结构都是基于堆实现的，需要额外的指针以及引用操作。因此执行效率上较为低下。在论文\cite{dybvig87timpl}中，给出了更加高效的模型。
+
+由于此处没有实现宏，因此缺乏直接定义\texttt{and or}为宏的能力。And or不同于其他操作符的地方在于，一般操作符先对操作数求值，然后才是操作符的操作。而若是and的左操作符为假，则该操作右边的部分不会执行，这种区别在语句有副作用以及可能产生递归时非常显著。比如下面的例子中，若and是函数，则会无限递归下去。
+
+\begin{code}
+\begin{minted}{scheme}
+(letrec ([recnoop (lambda (n)
+                    (and (> n 0) (recnoop (- n 1))))])
+  (recnoop 3))
+\end{minted}
+\caption{and操作示例}
+\end{code}

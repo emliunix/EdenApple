@@ -46,7 +46,7 @@ void call() {
 
 \section{call/cc}
 
-call/cc是scheme中的一个语法式。通过call/cc，scheme提供了first class continuation的特性，也就是可以将continuation作为值传递。这里continuation的含义是程序接下来要执行的事情。往往，对于一个程序的执行过程，可以将其抽象成当前的计算和接下来需要执行的事情，而程序的运行可以表示为将当前的计算结果传入下一个continuation。
+call/cc是scheme中的一个语法式。通过call/cc，scheme提供了first class continuation的特性，也就是可以将continuation作为值传递。这里continuation的含义是程序接下来要执行的事情。往往，对于一个程序的执行过程，可以将其抽象成当前的计算和接下来需要执行的事情，而程序的运行可以表示为将当前的计算结果传入下一个continuation。而call/cc的作用便是捕获程序当前运行时的continuatin并作为值传递。
 
 下面以一段实际的scheme代码为例：
 
