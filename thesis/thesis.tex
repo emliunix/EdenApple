@@ -15,34 +15,42 @@
 
 % 中文字体设置
 \setCJKmainfont{Noto Serif CJK SC}[AutoFakeSlant=true]
-\setCJKsansfont{Noto Sans CJK SC}
-\setCJKmonofont{Noto Sans Mono CJK SC}
+\setCJKsansfont{Noto Sans CJK SC}[AutoFakeSlant=true]
+\setCJKmonofont{Noto Sans Mono CJK SC}[AutoFakeSlant=true]
 
 \graphicspath{{figures/}}
+
+\ctexset{
+  chapter = {
+    name = {},
+    number = \arabic{chapter}
+  }
+}
+
+\geometry{margin=25mm}
 
 \begin{document}
 
 \frontmatter
 \input{cover}
 \makecover
-\tableofcontents
 
 \mainmatter
 %% page style
 \fancypagestyle{hubu@thesis}{%
-  \fancyhead[R]{\songti\xiaowu\textit{湖北大学本科毕业论文（设计）}}
+  \fancyhead[R]{\xiaowu\textsl{湖北大学本科毕业论文（设计）}}
   \fancyfoot[C]{\xiaowu\thepage}
   \renewcommand{\headrulewidth}{0pt}
   \renewcommand{\footrulewidth}{0pt}}
 \pagestyle{hubu@thesis}
 
+\xiaosi
 \include{ch01-intro}
 \include{ch02-lang-features}
 \include{ch03-interp}
 \include{ch04-monadic-parser}
 \include{ch05-the-vm}
 \include{ch06-conclusion}
-\include{acknowledgement}
 
 \backmatter
 
@@ -50,9 +58,9 @@
 \bibliography{ref}
 
 %% 致谢
-%\include{data/ack}
+\include{acknowledgement}
 
 % 翻译
-\include{tran}
+%\include{tran}
 
 \end{document}

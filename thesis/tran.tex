@@ -1,5 +1,45 @@
-\chapter*{翻译}
-\addcontentsline{toc}{chapter}{翻译}
+\documentclass[UTF8]{ctexart}
+
+\usepackage{xeCJK}
+\setCJKmainfont{Noto Serif CJK SC}[AutoFakeSlant=true]
+\setCJKsansfont{Noto Sans CJK SC}
+\setCJKmonofont{Noto Sans Mono CJK SC}
+
+\input{hubupagelayout}
+\usepackage{fancyhdr}
+\pagestyle{plain}
+
+\title{翻\hspace{\ccwd}译}
+\date{}
+
+\ctexset{%
+    section = {
+        format={\centering\heiti\zihao{3}},
+    }
+}
+
+\zihao{-4}
+\newcommand{\transource}[1]{%
+{\vskip 1em
+\indent\zihao{-4}\heiti 原文来源：\rmfamily\zihao{5} #1
+\vskip 1em
+}}
+\newcommand{\trancontent}[0]{%
+\indent\zihao{-4}\heiti 译文正文：
+\zihao{5}\songti\\
+\vskip 0.5em
+}
+\newcommand{\tranorigin}[0]{原文正文：}
+
+\begin{document}
+
+\maketitle
+
+%\addcontentsline{toc}{chapter}{翻译}
 
 \input{tran-eopl-preface}
+\clearpage
 \input{tran-the-little-schemer}
+%\tranorigin
+
+\end{document}

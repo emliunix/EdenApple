@@ -11,7 +11,12 @@
 \newcommand{\hsbind}[0]{$>\!\!>\!\!=$}
 \newcommand{\hschoice}[0]{$<\!\!|\!\!>$}
 
-\chapter{Monadic Parser Combinator}
+{
+    \let\centering\raggedright
+    \chapter{Monadic Parser Combinator}
+    \label{ch:parser}
+    \thispagestyle{hubu@thesis}
+}
 
 对于一个完整的解释器而言，parser是必不可少的一部分。在上一章节中提及过EdenApple中的reader的唯一功能即parser。
 
@@ -120,6 +125,8 @@ Monad是纯函数式编程中一个重要的概念，在Haskell中，依赖于Mo
   \caption{XML Monad解析器片段}
   \label{lst:xml-parser-sample}
 \end{code}
+
+有关Monad结构的更多内容可以参考\textit{Real world Haskell\cite{O2008Real}}。
 
 \section{Lisp文法}
 

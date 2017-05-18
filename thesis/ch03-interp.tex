@@ -3,9 +3,26 @@
 % 讲解Lisp解释器的组成部分。
 %
 
-\chapter{解释器结构}
+{
+    \let\centering\raggedright
+    \chapter{解释器结构}
+    \label{ch:interp structure}
+}    \thispagestyle{hubu@thesis}
+
 
 本章节讨论一般Lisp解释器的结构，相关的技术以及EdenApple这个解释器实现的具体结构。EdenApple的VM与Compiler主要参考R. Kent Dybvig的Three implementation models for scheme\cite{dybvig87timpl}中的Heap-based model。语义上的细节主要参考scheme语言规范r6rs\cite{r6rs}。
+
+解释器的工作原理在\textit{Essentials of Programming Language\cite{friedman2001eopl}}中有很好的描述，本论文的实现亦有沿用其中的思路。
+
+EdenApple的基本结构如图\ref{fig:interp structure}所示：
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=\textwidth]{interpreter}
+\end{center}
+\caption{解释器结构}
+\label{fig:interp structure}
+\end{figure}
 
 Lisp以及Scheme虽然是动态类型语言，但是语言的运行环境的实现方式上却是多种多样的。通常动态语言是解释执行的，scheme虽然也有许多实现是解释执行的，但是大多数都采取先编译后执行的策略。除了解释执行与编译执行之外，也有将scheme代码编译成C代码的实现，比如chicken。
 
@@ -97,7 +114,7 @@ VM是程序能够运行的核心。通常一个机器能够运行体现在他能
 
 此时函数抽象表达式的值通常称之为闭包（closure），以示他与一般意义上的函数存在的一些区别，可以将closure看作是有函数本身以及函数定义时所在的环境组成的二元组。
 
-所以在语言具备闭包特性的情况下，环境与控制上下文难以如同C语言中那样简单直接的组合在一起。但是并不是表示只能够将两个上下文完全分开管理，因为栈式结构中本地变量的管理与访问速度相比较于放入堆中的情况更加简单而且快速，所以也存在过相关的研究与结果，详情参考Three implementation models for scheme\cite{dybvig87timpl}以及chez scheme。 
+所以在语言具备闭包特性的情况下，环境与控制上下文难以如同C语言中那样简单直接的组合在一起。但是并不是表示只能够将两个上下文完全分开管理，因为栈式结构中本地变量的管理与访问速度相比较于放入堆中的情况更加简单而且快速，所以也存在过相关的研究与结果，详情参考\textit{An introduction to Scheme and its Implementation\cite{wilson96intro}}, \textit{Three implementation models for scheme\cite{dybvig87timpl}}以及chez scheme。 
 
 关于闭包在内存中的结构，可以参考图\ref{fig:closure-mem-layout}：
 

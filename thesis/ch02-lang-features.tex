@@ -2,9 +2,14 @@
 % 第二章 语言特性
 %
 
-\chapter{常见语法特性}
+{
+    \let\centering\raggedright
+    \chapter{常见语法特性}
+    \label{ch:lang features}
+    \thispagestyle{hubu@thesis}
+}
 
-Lisp经过半个多世纪的发展，产生了许许多多的方言，这些方言不仅逐渐完善了Lisp最初的核心功能，还将许多思想带入到了Lisp系语言。比如hygienic macro，lexical scoping，first class continuation，等等。接下来简单讲解下lexical scoping，first class continuation与proper tail call optimization。
+Lisp经过半个多世纪的发展，产生了许许多多的方言，这些方言不仅逐渐完善了Lisp最初的核心功能，还将许多思想带入到了Lisp系语言。比如hygienic macro，lexical scoping，first class continuation，等等。接下来简单讲解lexical scoping，first class continuation与proper tail call optimization这三个语言特性。
 
 为了方便描述，本论文接下来将以scheme作为主要描述对象，scheme是Lisp的一个方言。是众多Lisp方言中较为简洁明了的一个方言，同时仍然具备完整灵活的主要语言特性。关于scheme以及其实现的更多资料，可以参考Kent Dybvig的The Scheme Programming Language\cite{dybvig09scm}，SICP\cite{sicp}，Lisp in Small Pieces\cite{que03}等书。
 
@@ -77,11 +82,15 @@ call/cc是scheme中的一个语法式。通过call/cc，scheme提供了first cla
 
 这个特性以及其变体在其他语言，比如SML，OCaml，Haskell中也有相应的实现。通过call/cc可以实现许多复杂的控制结构，比如McCarthy的amb操作符\cite{mccarthy61}，coroutine，异常处理，线程，等等。
 
+在\textit{Threads Yield Continuations\cite{kumar1998threads}}，\textit{Continuations and threads: Expressing machine concurrency directly in advanced languages\cite{shivers1997continuations}}中描述了线程如何与call/cc一起工作。
+
+在\textit{Implementation Strategies for First-Class Continuations\cite{clinger1999implementation}}中描述了几种call/cc的实现方式，并比较了各个方式的优缺点。
+
 \section{尾调用优化}
 
 在程序执行过程中一个基本的操作便是函数调用，通常伴随着函数调用操作，控制栈上会压入一帧来保存本次调用需要的数据，或者类似的行为。但是，随着函数调用深度的加深，尤其是在递归调用中，控制栈的大小会越来越大，直到超过一定限制导致程序错误。这里介绍一种特殊的递归情况，在这种情况下的递归调用不需要增长控制栈的大小，由此可以带来无限递归的可能。
 
-在一个函数的具体执行流程中，当某一个函数调用操作的直接后继操作是返回（return）时，该操作可以被称之为尾调用（tail call）。尾调用具有如下特性：
+在一个函数的具体执行流程中，当某一个函数调用操作的直接后继操作是返回（\texttt{return}）时，该操作可以被称之为尾调用（\texttt{tail call}）。尾调用具有如下特性：
 
 \begin{enumerate}[1.]
 \item 是一次函数调用的一部分，而不是全局中的一条语句

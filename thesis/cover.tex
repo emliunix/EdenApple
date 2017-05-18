@@ -1,5 +1,5 @@
 \thusetup{
-  ctitle={EdenApple - Lisp 解释器},
+  ctitle={EdenApple - Lisp 解释器设计},
   etitle={EdenApple - a Lisp Interpreter},
   cauthor={刘宇辉},
   cdegree={学士学位},
@@ -11,17 +11,17 @@
 }
 
 \begin{cabstract}
-编程语言是现如今计算机系统中的核心，无论何种计算机系统基本上都通过某一个或几个编程语言来编写组织功能。而关于编程语言与编译器的研究也一直都是计算机研究中非常重要的一部分。编程语言与编译器和解释器的实现是两个相互联系密切却又有些相互独立的部分。编程语言的特性是程序设计最直接依赖的规则，而语言特性的实现离不开编译器与解释器提供的一些特定的功能。当今编译器的前后端架构为这种分离提供了一种统一的框架，更是为编程语言与编译器的研究建立了坚实的基础。本文探索动态类型语言的解释器实现方式以及优化方案。
+编程语言是现如今计算机系统中的核心，无论何种计算机系统基本上都通过某一个或几个编程语言来编写组织功能。而关于编程语言与编译器的研究也一直都是计算机研究中非常重要的一部分。编程语言与编译器和解释器的实现是两个相互联系密切却又有些相互独立的部分。编程语言的特性是程序设计最直接依赖的规则，而语言特性的实现离不开编译器与解释器提供的一些特定的功能。本文探索动态类型语言的解释器实现方式以及优化方案。
 
-本文尝试通过完成一个较为完整的解释器来探索类似scheme的动态类型语言的解释器的必要组成部分以及在解释器实现中可能的优化方案。首先探讨了动态语言需要的几个基本语言特性，随后在实现中尝试提供这些语言特性所需要的基础功能，并在此过程中探讨语言特性所带来的各种实现与优化上的限制。
+本文尝试通过完成一个较为完整的解释器来探索类似scheme的动态类型语言的解释器的必要组成部分以及在解释器实现中可能的优化方案。首先探讨了动态语言需要的几个基本语言特性，随后在实现中尝试提供这些语言特性所需要的基础功能，并在此过程中探讨语言特性所带来的各种实现与优化上的限制。通过这些尝试最终能够展示一个程序是如何运行的。
 
 论文最终提供了一个完整的简化lisp语言的解释器实现，提供了词法作用域，call/cc，尾递归优化，递归数据定义的特性。
 \end{cabstract}
 
 \begin{eabstract}
-Programming language is the core of today's computer system. Almost every sophisticated computer system is built up on one or several computer languages. The research about lanuage and compiler and interpreter is one of the most important parts of research in computer science. The two fields are closely related but developed independently. Modern compiler infrastructure are divided into frontend and backend, which established solid basis for the development of language and compiler and interpreter. In this paper we'll explore the implementation and possible enhancements of the interpreter of dynamic type languages.
+Programming language is the core of today's computer system. Almost every sophisticated computer system is built up on one or several computer languages. The research about lanuage and compiler and interpreter is one of the most important parts of research in computer science. The two fields are closely related but developed independently. A language feature cannot be possible without certain functionalities the compiler or interpreter provides. In this paper we'll explore the implementation and possible enhancements of the interpreter of dynamic type languages.
 
-In this paper, we'll explore the vital components and possible enhancements in dynamic type languages like scheme by implementing a function complete interpreter. First, a few language features are discussed. And then implementation details include basic features needed, restrictions and enhancements are explored by implementing them.
+In this paper, we'll explore the vital components and possible enhancements in dynamic typed languages like scheme by implementing a functions complete interpreter. First, a few language features are discussed. And then implementation details include basic features needed, restrictions and enhancements are explored by implementing them. Through all these efforts, it's clear to see how a program runs.
 
 Finally, there is a feature complete interpreter for a small lisp language. The core language features it provides are lexical scoping, call/cc, tail call optimization and mutually recursive data.
 \end{eabstract}
