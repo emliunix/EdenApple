@@ -70,7 +70,9 @@
             e.cycle();
             printVM(v);
         }
-        console.log("Final result => " + printVal(e.result()))
+        res = e.result()
+        console.log("Final result => " + printVal(res))
+        return res
     }
 
     function compilerTest() {
@@ -96,7 +98,7 @@
             return v1 === v2
         }
     }
-
+/*
     function test(code, next, asm) {
         let {stream} = g.parsec;
         const real_asm = g.compiler.compile(g.lispParser.parse(stream.ofString(code)).value, next)
@@ -142,12 +144,24 @@ test(
         ["argument",
           ["refer", V.s("a"),
             ["apply"]]]]]])
-
+*/
 
     g.main = {
         compilerTest,
-        test,
+//        test,
         run,
         runCode
     }
+
+    // GUI logic
+    function runStr(code) {
+        return main.runCode(compiler.compile(lispParser.parse(parsec.stream.ofString(code)).value, ["halt"]))
+    }
+
+    document.querySelector('#run').onclick
+        = function() {
+            code = document.querySelector('#code').innerText
+            document.querySelector('#output-content').innerText = runStr(code)
+        }
+
 })(this);

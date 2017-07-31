@@ -264,7 +264,7 @@
         },
         "-"(...args) {
             if(args.length === 1) {
-                return V.int(-args[0])
+                return V.int(-args[0][1])
             } else if(args.length > 1) {
                 return V.int(args.map(U.toJsValue).reduce((a, v) => a - v))
             } else
